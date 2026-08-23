@@ -1,12 +1,14 @@
 import { evaluate } from '../lib/sigma/index.ts';
 import type { ConditionNode, FieldCheck, Trace } from '../lib/sigma/index.ts';
 import { EXAMPLES, DEFAULT_EXAMPLE } from '../lib/examples.ts';
+import { Dropdown } from './dropdown.ts';
+import { animateDisclosures, initReveal, pulseOnChange } from './motion.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
 const ruleBox = $<HTMLTextAreaElement>('#rule');
 const eventBox = $<HTMLTextAreaElement>('#event');
-const picker = $<HTMLSelectElement>('#examples');
+const pickerMount = $<HTMLElement>('#example-mount');
 const verdictEl = $<HTMLElement>('#verdict');
 const msgsEl = $<HTMLElement>('#msgs');
 const blocksEl = $<HTMLElement>('#blocks');
@@ -131,6 +133,7 @@ function renderVerdict(trace: Trace) {
       ? `The condition is not satisfied. Blocks that did match: ${trueBlocks.join(', ')}.`
       : 'No search identifier matched this event.';
   }
+  pulseOnChange(verdictEl, badge + '|' + why);
   verdictEl.innerHTML = `
     <span class="badge">${badge}</span>
     <span class="why">${esc(why)}</span>
@@ -183,12 +186,13 @@ function schedule() {
   timer = window.setTimeout(run, 120);
 }
 
+let picker: Dropdown;
+
 function loadExample(id: string) {
   const ex = EXAMPLES.find((e) => e.id === id) ?? DEFAULT_EXAMPLE;
   ruleBox.value = ex.rule;
   eventBox.value = ex.event;
   noteEl.textContent = ex.note;
-  picker.value = ex.id;
   run();
 }
 
@@ -206,7 +210,9 @@ function decodeState(hash: string): { r: string; e: string } | null {
 }
 
 function init() {
-  picker.innerHTML = EXAMPLES.map((e) => `<option value="${esc(e.id)}">${esc(e.label)}</option>`).join('');
+  picker = new Dropdown(pickerMount, 'example-label', (id) => loadExample(id));
+  picker.setOptions(EXAMPLES.map((e) => ({ value: e.id, label: e.label })));
+  animateDisclosures(blocksEl);
 
   const fromUrl = location.hash.startsWith('#s=') ? decodeState(location.hash.slice(3)) : null;
   if (fromUrl) {
@@ -220,7 +226,7 @@ function init() {
 
   ruleBox.addEventListener('input', schedule);
   eventBox.addEventListener('input', schedule);
-  picker.addEventListener('change', () => loadExample(picker.value));
+  initReveal();
 
   shareBtn.addEventListener('click', async () => {
     const url = `${location.origin}${location.pathname}#s=${encodeState()}`;

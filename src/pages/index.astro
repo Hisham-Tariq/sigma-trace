@@ -26,10 +26,26 @@ const description =
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400..700&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
   />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#931;</text></svg>" />
+
+  <script is:inline>
+    /* Effects are opt-in via classes on <html>, the same pattern as
+       hishamtariq.com, so nothing is ever hidden or animated without JS. */
+    (function () {
+      var h = document.documentElement;
+      h.classList.add('fx-grain', 'fx-reveal');
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        h.classList.add('fx-drift');
+      }
+    })();
+  </script>
 </head>
 <body>
 
-<header class="top">
+<div class="bg-graticule" aria-hidden="true"></div>
+<div class="bg-vignette" aria-hidden="true"></div>
+<div class="bg-grain" aria-hidden="true"></div>
+
+<header class="top reveal">
   <div class="wrap">
     <div class="brand">
       <h1>Sigma&nbsp;Trace<span class="dot">.</span></h1>
@@ -47,14 +63,14 @@ const description =
 
 <main class="wrap">
 
-  <div class="bar">
-    <label for="examples">Example</label>
-    <select id="examples" aria-label="Load a worked example"></select>
-    <span id="example-note" class="why" style="color:var(--muted);font-size:.86rem"></span>
+  <div class="bar reveal">
+    <span class="dd-label" id="example-label">Example</span>
+    <div id="example-mount"></div>
+    <span id="example-note"></span>
     <button id="share" class="btn spacer" type="button">Copy share link</button>
   </div>
 
-  <div class="panes">
+  <div class="panes reveal-stagger">
     <section class="pane">
       <div class="pane-h">
         <span>Sigma rule</span>
@@ -74,10 +90,10 @@ const description =
     </section>
   </div>
 
-  <div id="verdict" class="verdict is-quiet" role="status" aria-live="polite"></div>
+  <div id="verdict" class="verdict is-quiet reveal" role="status" aria-live="polite"></div>
   <div id="msgs" class="msgs"></div>
 
-  <div class="results">
+  <div class="results reveal-stagger">
     <section class="card">
       <h2>Blocks — what matched, and why</h2>
       <div class="card-body" id="blocks"></div>
@@ -91,7 +107,7 @@ const description =
 
 </main>
 
-<footer>
+<footer class="reveal">
   <div class="wrap">
     <span>Unofficial. Not affiliated with SigmaHQ.</span>
     <span class="mono">MIT</span>

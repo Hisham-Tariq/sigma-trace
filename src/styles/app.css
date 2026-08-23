@@ -29,8 +29,8 @@ button{cursor:pointer}
   --rule-strong:#eceae338;
   --card-shadow:0 1px 2px #0006;
   --bevel:inset 0 1px 0 #ffffff0a,inset 0 -1px 0 #00000059;
-  --grid-major:#eceae30e;
-  --grid-minor:#eceae306;
+  --grid-major:rgba(236,234,227,.055);
+  --grid-minor:rgba(236,234,227,.022);
   --grain-opacity:.035;
   --radius:4px;
   --wrap:1160px;
@@ -63,13 +63,62 @@ body{
   letter-spacing:.01em;
   -webkit-font-smoothing:antialiased;
   position:relative;
+  z-index:0;
 }
-/* The site's grain. Kept at the same opacity so the surfaces feel identical. */
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
-  opacity:var(--grain-opacity);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+
+/* ---------- background layers, matching hishamtariq.com ---------- */
+
+/* Two-tier graticule: 16px minor grid, 80px major every fifth line. */
+.bg-graticule{
+  position:fixed;
+  /* bleed top/left only: the drift travels +x/+y */
+  inset:-80px 0 0 -80px;
+  z-index:-2;pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid-major) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-major) 1px,transparent 1px),
+    linear-gradient(var(--grid-minor) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-minor) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,16px 16px,16px 16px;
 }
+@media (prefers-reduced-motion:no-preference){
+  html.fx-drift .bg-graticule{animation:grid-drift 60s linear infinite}
+}
+@keyframes grid-drift{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(80px,80px,0)}
+}
+
+/* Corner vignette for depth. */
+.bg-vignette{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 20%,transparent 55%,var(--bg-sunken) 130%);
+  opacity:.8;
+}
+
+/* Paper grain: inline SVG turbulence, no asset. */
+.bg-grain{
+  position:fixed;inset:0;z-index:9990;pointer-events:none;
+  opacity:0;mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  transition:opacity .4s ease;
+}
+html.fx-grain .bg-grain{opacity:var(--grain-opacity)}
+
+/* ---------- scroll reveal ---------- */
+html.fx-reveal .reveal{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .7s var(--ease),transform .7s var(--ease);
+}
+html.fx-reveal .reveal.in{opacity:1;transform:translateY(0)}
+html.fx-reveal .reveal-stagger > *{
+  opacity:0;transform:translateY(12px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease);
+}
+html.fx-reveal .reveal-stagger.in > *{opacity:1;transform:translateY(0)}
+html.fx-reveal .reveal-stagger.in > *:nth-child(1){transition-delay:0ms}
+html.fx-reveal .reveal-stagger.in > *:nth-child(2){transition-delay:60ms}
+html.fx-reveal .reveal-stagger.in > *:nth-child(3){transition-delay:120ms}
 .wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
 
 /* ---------- masthead ---------- */
@@ -98,19 +147,72 @@ body::before{
 .bar{
   display:flex;flex-wrap:wrap;gap:10px;align-items:center;
   padding:14px 0;border-bottom:1px solid var(--rule);
+  /* The reveal animation puts a transform on .bar and .panes, and a transform
+     creates a stacking context. That traps the dropdown's z-index inside .bar,
+     so .panes — later in the DOM — painted its textareas over the open list.
+     Lifting .bar itself is what actually fixes it; raising .dd-list does not. */
+  position:relative;z-index:40;
 }
 .bar label{
   font-family:var(--font-label);font-size:.66rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink-dim);
 }
-select,.btn{
+.btn,.dd-btn{
   background:var(--bg-raised);border:1px solid var(--rule-strong);
-  border-radius:var(--radius);padding:6px 11px;font-size:.85rem;color:var(--ink);
-  box-shadow:var(--bevel);transition:border-color .15s var(--ease);
+  border-radius:var(--radius);padding:7px 12px;font-size:.85rem;color:var(--ink);
+  box-shadow:var(--bevel);
+  transition:border-color .2s var(--ease),background-color .2s var(--ease),
+             color .2s var(--ease),transform .2s var(--ease);
 }
-.btn:hover,select:hover{border-color:var(--accent)}
-.btn:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+.btn:hover,.dd-btn:hover{border-color:var(--accent);background:var(--bg-sunken)}
+.btn:active,.dd-btn:active{transform:translateY(1px)}
+.btn:focus-visible,.dd-btn:focus-visible,textarea:focus-visible,summary:focus-visible,
+.dd-list li:focus-visible{
   outline:2px solid var(--accent-strong);outline-offset:2px;
+}
+
+/* ---------- dropdown ---------- *
+ * A native <select> draws its popup outside the page, so no CSS can animate
+ * it. This is a listbox we own: same keyboard behaviour, ARIA roles intact.  */
+.dd{position:relative}
+.dd-label{
+  font-family:var(--font-label);font-size:.66rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-dim);
+}
+.dd-btn{
+  display:inline-flex;align-items:center;gap:12px;
+  min-width:min(19rem,70vw);text-align:left;
+}
+.dd-value{flex:1}
+.dd-caret{
+  width:7px;height:7px;flex:none;margin-top:-3px;
+  border-right:1.5px solid var(--ink-dim);border-bottom:1.5px solid var(--ink-dim);
+  transform:rotate(45deg);
+  transition:transform .24s var(--ease),border-color .2s var(--ease);
+}
+.dd.is-open .dd-caret{transform:rotate(-135deg) translate(-2px,-2px);border-color:var(--accent-strong)}
+.dd-list{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:60;
+  min-width:100%;max-width:min(30rem,88vw);
+  background:var(--bg-raised);border:1px solid var(--rule-strong);
+  border-radius:var(--radius);
+  box-shadow:0 18px 44px -20px #000c,var(--bevel);
+  padding:4px;overflow:hidden;
+  opacity:0;transform:translateY(-6px) scale(.985);transform-origin:top left;
+  transition:opacity .18s var(--ease),transform .18s var(--ease);
+}
+.dd.is-shown .dd-list{opacity:1;transform:translateY(0) scale(1)}
+.dd-list li{
+  padding:8px 11px;border-radius:calc(var(--radius) - 1px);cursor:pointer;
+  font-size:.86rem;color:var(--ink-dim);
+  transition:background-color .16s var(--ease),color .16s var(--ease);
+}
+.dd-list li:hover,.dd-list li.is-active{background:var(--accent-tint);color:var(--ink)}
+.dd-list li[aria-selected="true"]{color:var(--accent-2)}
+.dd-list li[aria-selected="true"]::after{content:" \2713";color:var(--accent-2)}
+@media (prefers-reduced-motion:reduce){
+  .dd-list{transition:none}
+  .dd-caret{transition:none}
 }
 .spacer{margin-left:auto}
 #example-note{font-family:var(--font-body);font-style:italic;color:var(--ink-dim);font-size:.92rem}
@@ -147,6 +249,7 @@ textarea:focus{outline:none}
   border:1px solid var(--rule);border-left-width:3px;border-radius:var(--radius);
   padding:14px 18px;background:var(--bg-raised);
   box-shadow:var(--card-shadow);margin-bottom:14px;
+  transition:border-left-color .3s var(--ease);
 }
 .verdict .badge{
   font-family:var(--font-label);font-size:.78rem;font-weight:700;letter-spacing:.12em;
@@ -199,10 +302,13 @@ textarea:focus{outline:none}
 /* ---------- blocks ---------- */
 .block{border:1px solid var(--rule);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
 .block:last-child{margin-bottom:0}
+.block{transition:border-color .25s var(--ease),box-shadow .25s var(--ease)}
 .block > summary{
   list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
   padding:9px 12px;background:var(--bg-sunken);
+  transition:background-color .2s var(--ease);
 }
+.block > summary:hover{background:var(--bg-raised)}
 .block > summary::-webkit-details-marker{display:none}
 .block > summary::before{
   content:"▸";color:var(--ink-faint);font-size:.7rem;flex:none;
@@ -215,6 +321,8 @@ textarea:focus{outline:none}
 .pill{
   font-family:var(--font-label);font-size:.6rem;letter-spacing:.1em;
   padding:2px 8px;border-radius:var(--radius);border:1px solid;flex:none;
+  transition:color .25s var(--ease),background-color .25s var(--ease),
+             border-color .25s var(--ease);
 }
 .pill.t{color:var(--hit);background:var(--hit-soft);border-color:var(--hit-line)}
 .pill.f{color:var(--miss);background:transparent;border-color:var(--rule-strong)}
@@ -276,5 +384,6 @@ footer .mono{font-family:var(--font-label);font-size:.7rem}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
-  body::before{display:none}
+  html.fx-reveal .reveal,
+  html.fx-reveal .reveal-stagger > *{opacity:1;transform:none}
 }
