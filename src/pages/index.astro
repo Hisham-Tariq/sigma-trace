@@ -1,0 +1,107 @@
+---
+import '../styles/app.css';
+
+const title = 'Sigma Trace';
+const description =
+  'Paste a Sigma rule and a log event. See exactly why the rule matched — field by field, block by block, condition and all. Runs entirely in your browser.';
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} — see why a Sigma rule matched</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0b0d0e" />
+
+  <!-- Same faces as hishamtariq.com, so the tool reads as part of the site. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400..700&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+  />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#931;</text></svg>" />
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Sigma&nbsp;Trace<span class="dot">.</span></h1>
+      <p>see why a rule matched</p>
+    </div>
+    <span class="privacy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+        <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>
+      nothing leaves your browser
+    </span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="bar">
+    <label for="examples">Example</label>
+    <select id="examples" aria-label="Load a worked example"></select>
+    <span id="example-note" class="why" style="color:var(--muted);font-size:.86rem"></span>
+    <button id="share" class="btn spacer" type="button">Copy share link</button>
+  </div>
+
+  <div class="panes">
+    <section class="pane">
+      <div class="pane-h">
+        <span>Sigma rule</span>
+        <span class="hint">YAML</span>
+      </div>
+      <label class="sr" for="rule">Sigma rule in YAML</label>
+      <textarea id="rule" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    </section>
+
+    <section class="pane">
+      <div class="pane-h">
+        <span>Log event</span>
+        <span class="hint">Field: value lines, or JSON</span>
+      </div>
+      <label class="sr" for="event">Log event</label>
+      <textarea id="event" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    </section>
+  </div>
+
+  <div id="verdict" class="verdict is-quiet" role="status" aria-live="polite"></div>
+  <div id="msgs" class="msgs"></div>
+
+  <div class="results">
+    <section class="card">
+      <h2>Blocks — what matched, and why</h2>
+      <div class="card-body" id="blocks"></div>
+    </section>
+
+    <section class="card">
+      <h2>Condition</h2>
+      <div class="card-body tree" id="tree"></div>
+    </section>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Unofficial. Not affiliated with SigmaHQ.</span>
+    <span class="mono">MIT</span>
+    <span class="mono spacer">built by Hisham Tariq</span>
+  </div>
+</footer>
+
+<script>
+  import '../scripts/tracer.ts';
+</script>
+
+</body>
+</html>
