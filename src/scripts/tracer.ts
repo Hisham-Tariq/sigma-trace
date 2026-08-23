@@ -3,6 +3,7 @@ import type { ConditionNode, FieldCheck, Trace } from '../lib/sigma/index.ts';
 import { EXAMPLES, DEFAULT_EXAMPLE } from '../lib/examples.ts';
 import { Dropdown } from './dropdown.ts';
 import { animateDisclosures, initReveal, pulseOnChange } from './motion.ts';
+import { initCursor } from './cursor.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
@@ -227,6 +228,7 @@ function init() {
   ruleBox.addEventListener('input', schedule);
   eventBox.addEventListener('input', schedule);
   initReveal();
+  if (document.documentElement.classList.contains('fx-cursor')) initCursor();
 
   shareBtn.addEventListener('click', async () => {
     const url = `${location.origin}${location.pathname}#s=${encodeState()}`;

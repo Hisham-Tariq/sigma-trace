@@ -6,35 +6,21 @@ ul,ol{list-style:none}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 
-/* ---------------------------------------------------------------- *
- * Tokens lifted verbatim from hishamtariq.com so the tool reads as
- * part of the same site. That site commits to a single dark theme —
- * it stamps data-theme="dark" and declares no light palette — so this
- * page does the same rather than inventing a light variant it would
- * be the only page on the domain to have.
- * ---------------------------------------------------------------- */
+/* ============================================================
+   Tokens copied from hishamtariq.com's LEDGER system so the tool
+   is the same design system, not an imitation of it.
+
+   Two orthogonal axes, exactly as on the site:
+     [data-theme]  = substrate  (dark board / light drafting paper)
+     [data-accent] = accent preset (cyan / oxide / phosphor / violet)
+   Components consume tokens only and never hardcode a hex.
+   ============================================================ */
+
+/* ---------- shape + type ---------- */
 :root{
-  --bg:#0b0d0e;
-  --bg-raised:#121517;
-  --bg-sunken:#07090a;
-  --ink:#eceae3;
-  --ink-dim:#a7aba8;
-  --ink-faint:#6a706e;
-  --accent:#1a8fa3;
-  --accent-strong:#20a6bd;
-  --accent-2:#c29d59;
-  --accent-contrast:#04181c;
-  --accent-tint:#1a8fa31a;
-  --rule:#eceae31f;
-  --rule-strong:#eceae338;
-  --card-shadow:0 1px 2px #0006;
-  --bevel:inset 0 1px 0 #ffffff0a,inset 0 -1px 0 #00000059;
-  --grid-major:rgba(236,234,227,.055);
-  --grid-minor:rgba(236,234,227,.022);
-  --grain-opacity:.035;
   --radius:4px;
+  --ease:cubic-bezier(0.4,0,0.2,1);
   --wrap:1160px;
-  --ease:cubic-bezier(.4,0,.2,1);
 
   --font-display:"Fraunces","Times New Roman",Georgia,serif;
   --font-body:"Newsreader",Georgia,"Times New Roman",serif;
@@ -43,27 +29,176 @@ button{cursor:pointer}
   /* Space Mono is the brand mono, but it is wide and stylised; dense rule and
      log text uses JetBrains Mono, which the site already loads for code. */
   --font-code:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
 
-  /* Semantic, deliberately separate from the brand accent.
-     Gold = matched, faint = not matched, rose = broken. */
-  --hit:var(--accent-2);
-  --hit-soft:#c29d5916;
-  --hit-line:#c29d5947;
-  --miss:var(--ink-faint);
+/* ---------- substrate: dark (default) ---------- */
+:root,
+[data-theme="dark"]{
+  --bg:#0b0d0e;
+  --bg-raised:#121517;
+  --bg-sunken:#07090a;
+  --ink:#eceae3;
+  --ink-dim:#a7aba8;
+  --ink-faint:#6a706e;
+  --rule:rgba(236,234,227,0.12);
+  --rule-strong:rgba(236,234,227,0.22);
+  --grid-major:rgba(236,234,227,0.055);
+  --grid-minor:rgba(236,234,227,0.022);
+  --bevel:inset 0 1px 0 rgba(255,255,255,0.04),inset 0 -1px 0 rgba(0,0,0,0.35);
+  --card-shadow:0 1px 2px rgba(0,0,0,0.4);
+  --grain-opacity:0.035;
+  --nav-bg:rgba(11,13,14,0.88);
+  --drop-shadow:0 18px 44px -20px rgba(0,0,0,0.8);
+  /* rose for "this is broken" — the one role the site has no token for */
   --bad:#d2707a;
-  --bad-soft:#d2707a14;
-  --bad-line:#d2707a45;
+  --bad-soft:rgba(210,112,122,0.08);
+  --bad-line:rgba(210,112,122,0.27);
+}
+
+/* ---------- substrate: light ---------- */
+[data-theme="light"]{
+  --bg:#f4f1ea;
+  --bg-raised:#fbfaf5;
+  --bg-sunken:#ece8dd;
+  --ink:#1a1c1b;
+  --ink-dim:#4a4f4c;
+  --ink-faint:#878b86;
+  --rule:rgba(26,28,27,0.14);
+  --rule-strong:rgba(26,28,27,0.26);
+  --grid-major:rgba(26,28,27,0.07);
+  --grid-minor:rgba(26,28,27,0.028);
+  --bevel:inset 0 1px 0 rgba(255,255,255,0.7),inset 0 -1px 0 rgba(26,28,27,0.06);
+  --card-shadow:0 1px 2px rgba(26,28,27,0.08);
+  --grain-opacity:0.05;
+  --nav-bg:rgba(244,241,234,0.88);
+  --drop-shadow:0 18px 44px -22px rgba(26,28,27,0.35);
+  --bad:#a8323f;
+  --bad-soft:rgba(168,50,63,0.07);
+  --bad-line:rgba(168,50,63,0.3);
+}
+
+/* ---------- accent presets ---------- *
+ * --hit is the "this matched" text colour and --accent-text is accent text on
+ * a tinted chip. Both are written as literal hex rather than derived with
+ * a mix function: several presets needed a nudge toward the ink to clear 4.5:1,
+ * the ratios were solved once up front, and literal values keep every computed
+ * colour a plain rgb() instead of oklab()/color(srgb) — which is both wider
+ * browser support and actually inspectable.                                   */
+:root,
+[data-accent="cyan"]{
+  --accent:#1a8fa3;
+  --accent-strong:#20a6bd;
+  --accent-tint:rgba(26,143,163,0.1);
+  --accent-contrast:#04181c;
+  --accent-2:#c29d59;
+  --hit:#c29d59;
+  --hit-soft:rgba(194,157,89,0.09);
+  --hit-line:rgba(194,157,89,0.3);
+  --accent-line:rgba(26,143,163,0.4);
+  --accent-text:#20a6bd;
+}
+[data-theme="light"][data-accent="cyan"],
+[data-theme="light"]:not([data-accent]){
+  --accent:#0e6e80;
+  --accent-strong:#0a5663;
+  --accent-tint:rgba(14,110,128,0.1);
+  --accent-contrast:#f4f1ea;
+  --accent-2:#9a7a3c;
+  --hit:#745e32;
+  --hit-soft:rgba(154,122,60,0.09);
+  --hit-line:rgba(154,122,60,0.3);
+  --accent-line:rgba(14,110,128,0.4);
+  --accent-text:#0a5663;
+}
+[data-accent="oxide"]{
+  --accent:#c2502e;
+  --accent-strong:#d85f39;
+  --accent-tint:rgba(194,80,46,0.1);
+  --accent-contrast:#1a0b06;
+  --accent-2:#6b7a6e;
+  --hit:#748276;
+  --hit-soft:rgba(107,122,110,0.09);
+  --hit-line:rgba(107,122,110,0.3);
+  --accent-line:rgba(194,80,46,0.4);
+  --accent-text:#d85f39;
+}
+[data-theme="light"][data-accent="oxide"]{
+  --accent:#a8421f;
+  --accent-strong:#8c3517;
+  --accent-tint:rgba(168,66,31,0.1);
+  --accent-contrast:#f4f1ea;
+  --accent-2:#5c6b5f;
+  --hit:#556358;
+  --hit-soft:rgba(92,107,95,0.09);
+  --hit-line:rgba(92,107,95,0.3);
+  --accent-line:rgba(168,66,31,0.4);
+  --accent-text:#8c3517;
+}
+[data-accent="phosphor"]{
+  --accent:#3fb950;
+  --accent-strong:#4fd062;
+  --accent-tint:rgba(63,185,80,0.1);
+  --accent-contrast:#04140a;
+  --accent-2:#8b8f94;
+  --hit:#8b8f94;
+  --hit-soft:rgba(139,143,148,0.09);
+  --hit-line:rgba(139,143,148,0.3);
+  --accent-line:rgba(63,185,80,0.4);
+  --accent-text:#4fd062;
+}
+[data-theme="light"][data-accent="phosphor"]{
+  --accent:#1f8f33;
+  --accent-strong:#187428;
+  --accent-tint:rgba(31,143,51,0.1);
+  --accent-contrast:#f4f1ea;
+  --accent-2:#6b7076;
+  --hit:#5c6166;
+  --hit-soft:rgba(107,112,118,0.09);
+  --hit-line:rgba(107,112,118,0.3);
+  --accent-line:rgba(31,143,51,0.4);
+  --accent-text:#186b27;
+}
+[data-accent="violet"]{
+  --accent:#6e78ff;
+  --accent-strong:#8088ff;
+  --accent-tint:rgba(110,120,255,0.1);
+  --accent-contrast:#0a0b1a;
+  --accent-2:#c29d59;
+  --hit:#c29d59;
+  --hit-soft:rgba(194,157,89,0.09);
+  --hit-line:rgba(194,157,89,0.3);
+  --accent-line:rgba(110,120,255,0.4);
+  --accent-text:#8088ff;
+}
+[data-theme="light"][data-accent="violet"]{
+  --accent:#4a53d6;
+  --accent-strong:#3a42b0;
+  --accent-tint:rgba(74,83,214,0.1);
+  --accent-contrast:#f4f1ea;
+  --accent-2:#9a7a3c;
+  --hit:#745e32;
+  --hit-soft:rgba(154,122,60,0.09);
+  --hit-line:rgba(154,122,60,0.3);
+  --accent-line:rgba(74,83,214,0.4);
+  --accent-text:#3a42b0;
+}
+
+/* miss / ok round out the semantic set; both follow the substrate. */
+:root{
+  --miss:var(--ink-faint);
   --ok:var(--accent-strong);
 }
 
-html{color-scheme:dark}
+:root{color-scheme:dark}
+[data-theme="light"]{color-scheme:light}
+
 body{
   background:var(--bg);color:var(--ink);
   font-family:var(--font-ui);font-size:15px;line-height:1.6;
   letter-spacing:.01em;
   -webkit-font-smoothing:antialiased;
-  position:relative;
-  z-index:0;
+  /* creates the stacking context the fixed background layers sit behind */
+  position:relative;z-index:0;
 }
 
 /* ---------- background layers, matching hishamtariq.com ---------- */
@@ -138,8 +273,9 @@ html.fx-reveal .reveal-stagger.in > *:nth-child(3){transition-delay:120ms}
 .privacy{
   display:inline-flex;align-items:center;gap:7px;
   font-family:var(--font-label);font-size:.68rem;letter-spacing:.04em;
-  color:var(--accent-strong);background:var(--accent-tint);
-  border:1px solid #1a8fa340;padding:4px 10px;border-radius:var(--radius);
+  color:var(--accent-text);background:var(--accent-tint);
+  border:1px solid var(--accent-line);
+  padding:4px 10px;border-radius:var(--radius);
 }
 .privacy svg{width:12px;height:12px;flex:none}
 
@@ -196,7 +332,7 @@ html.fx-reveal .reveal-stagger.in > *:nth-child(3){transition-delay:120ms}
   min-width:100%;max-width:min(30rem,88vw);
   background:var(--bg-raised);border:1px solid var(--rule-strong);
   border-radius:var(--radius);
-  box-shadow:0 18px 44px -20px #000c,var(--bevel);
+  box-shadow:var(--drop-shadow),var(--bevel);
   padding:4px;overflow:hidden;
   opacity:0;transform:translateY(-6px) scale(.985);transform-origin:top left;
   transition:opacity .18s var(--ease),transform .18s var(--ease);
@@ -316,7 +452,7 @@ textarea:focus{outline:none}
 }
 .block[open] > summary::before{transform:rotate(90deg)}
 .block .bname{font-family:var(--font-code);font-size:.81rem;color:var(--ink);font-weight:500}
-.block .kind{font-family:var(--font-label);font-size:.62rem;color:var(--ink-faint);margin-left:auto}
+.block .kind{font-family:var(--font-label);font-size:.62rem;color:var(--ink-dim);margin-left:auto}
 @media (max-width:520px){.block .kind{display:none}}
 .pill{
   font-family:var(--font-label);font-size:.6rem;letter-spacing:.1em;
@@ -374,12 +510,72 @@ textarea:focus{outline:none}
 /* ---------- footer ---------- */
 footer{
   border-top:1px solid var(--rule);background:var(--bg-sunken);
-  padding:22px 0 36px;color:var(--ink-faint);font-size:.8rem;
+  padding:22px 0 36px;color:var(--ink-dim);font-size:.8rem;
 }
 footer .wrap{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
-footer a{color:var(--accent-strong);text-decoration:none;border-bottom:1px solid #1a8fa340}
+footer a{color:var(--accent-text);text-decoration:none;
+  border-bottom:1px solid var(--accent-line)}
 footer a:hover{color:var(--ink)}
 footer .mono{font-family:var(--font-label);font-size:.7rem}
+
+/* ---------- crosshair probe cursor ---------- *
+ * Copied from hishamtariq.com. Desktop pointers only, opt-in via
+ * html.fx-cursor, and never shown under prefers-reduced-motion.        */
+@media (pointer:fine){
+  html.fx-cursor,
+  html.fx-cursor body,
+  html.fx-cursor a,
+  html.fx-cursor button,
+  html.fx-cursor [role="button"],
+  html.fx-cursor [role="option"],
+  html.fx-cursor label,
+  html.fx-cursor summary,
+  html.fx-cursor textarea{
+    cursor:none !important;
+  }
+}
+#cursor-reticle,
+#cursor-readout{
+  position:fixed;top:0;left:0;z-index:99999;pointer-events:none;display:none;
+}
+html.fx-cursor #cursor-reticle,
+html.fx-cursor #cursor-readout{display:block}
+@media (pointer:coarse){
+  html.fx-cursor #cursor-reticle,
+  html.fx-cursor #cursor-readout{display:none}
+}
+#cursor-reticle{
+  width:24px;height:24px;margin:-12px 0 0 -12px;
+  border:1px solid var(--accent);
+  transition:width .2s var(--ease),height .2s var(--ease),margin .2s var(--ease),
+             border-color .2s var(--ease),background-color .2s var(--ease);
+  will-change:transform;
+}
+#cursor-reticle::before,
+#cursor-reticle::after{
+  content:"";position:absolute;background:var(--accent);transition:opacity .2s ease;
+}
+#cursor-reticle::before{left:50%;top:-5px;bottom:-5px;width:1px;transform:translateX(-50%)}
+#cursor-reticle::after{top:50%;left:-5px;right:-5px;height:1px;transform:translateY(-50%)}
+#cursor-reticle.is-link{
+  width:44px;height:44px;margin:-22px 0 0 -22px;
+  border-width:2px;background:var(--accent-tint);
+}
+#cursor-reticle.is-link::before,
+#cursor-reticle.is-link::after{opacity:0}
+#cursor-reticle.is-text{
+  width:3px;height:1.4em;margin:-.7em 0 0 -1px;border:0;background:var(--accent);
+}
+#cursor-reticle.is-text::before,
+#cursor-reticle.is-text::after{opacity:0}
+#cursor-readout{
+  font-family:var(--font-label);font-size:.625rem;font-weight:700;
+  font-feature-settings:"zero" 1;letter-spacing:.06em;
+  color:var(--accent);background:var(--bg);
+  border:1px solid var(--rule);padding:1px 5px;white-space:nowrap;
+  will-change:transform;
+}
+#cursor-readout.is-hidden{visibility:hidden}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){

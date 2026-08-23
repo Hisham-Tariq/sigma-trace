@@ -15,8 +15,9 @@ const description =
   <meta name="description" content={description} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#0b0d0e" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0b0d0e" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)" />
 
   <!-- Same faces as hishamtariq.com, so the tool reads as part of the site. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -28,14 +29,24 @@ const description =
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#931;</text></svg>" />
 
   <script is:inline>
-    /* Effects are opt-in via classes on <html>, the same pattern as
-       hishamtariq.com, so nothing is ever hidden or animated without JS. */
+    /* Prefs boot, before first paint — the same keys and the same fx-class
+       pattern hishamtariq.com uses, so this page obeys the same settings.
+       Note: localStorage is per-origin, so a subdomain does not literally
+       inherit the main site's choice; matching the keys means the behaviour
+       and the defaults are identical, not that they sync. */
     (function () {
       var h = document.documentElement;
-      h.classList.add('fx-grain', 'fx-reveal');
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        h.classList.add('fx-drift');
-      }
+      var prefs = {};
+      try { prefs = JSON.parse(localStorage.getItem('site-prefs') || '{}'); } catch (e) {}
+      var theme = prefs.theme;
+      if (!theme) { try { theme = localStorage.getItem('theme'); } catch (e) {} }
+      h.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+      var ACCENTS = ['cyan', 'oxide', 'phosphor', 'violet'];
+      h.setAttribute('data-accent', ACCENTS.indexOf(prefs.accent) > -1 ? prefs.accent : 'cyan');
+
+      var fx = Object.assign({ grain: true, reveal: true, drift: true, cursor: true }, prefs.fx || {});
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { fx.drift = false; fx.cursor = false; }
+      for (var k in fx) { if (fx[k]) h.classList.add('fx-' + k); }
     })();
   </script>
 </head>
@@ -44,6 +55,9 @@ const description =
 <div class="bg-graticule" aria-hidden="true"></div>
 <div class="bg-vignette" aria-hidden="true"></div>
 <div class="bg-grain" aria-hidden="true"></div>
+
+<div id="cursor-reticle" aria-hidden="true"></div>
+<div id="cursor-readout" aria-hidden="true">x:0000 y:0000</div>
 
 <header class="top reveal">
   <div class="wrap">
