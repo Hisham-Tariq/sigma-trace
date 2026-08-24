@@ -96,3 +96,47 @@ export function pulseOnChange(el: HTMLElement, key: string) {
     { duration: 260, easing: EASE },
   );
 }
+
+/**
+ * Mono labels decode on load. Ported from site.js: same glyph set, same 28ms
+ * tick, same "two iterations per character" length.
+ */
+export function initScramble() {
+  if (reducedMotion()) return;
+  const GLYPHS = '!<>-_\\/[]{}—=+*^?#0123456789';
+  document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+    const final = el.textContent ?? '';
+    let iter = 0;
+    const max = final.length * 2;
+    const id = window.setInterval(() => {
+      el.textContent = final
+        .split('')
+        .map((ch, i) =>
+          i < iter / 2 || ch === ' ' ? ch : GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+        )
+        .join('');
+      if (++iter >= max) {
+        window.clearInterval(id);
+        el.textContent = final;
+      }
+    }, 28);
+  });
+}
+
+/**
+ * Accent glow follows the pointer across cards, driven by --mx/--my, matching
+ * the site's .index-card treatment.
+ */
+export function initSpotlight() {
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      const card = (e.target as Element | null)?.closest?.('[data-spotlight]');
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      (card as HTMLElement).style.setProperty('--mx', `${e.clientX - r.left}px`);
+      (card as HTMLElement).style.setProperty('--my', `${e.clientY - r.top}px`);
+    },
+    { passive: true },
+  );
+}

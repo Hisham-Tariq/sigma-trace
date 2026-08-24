@@ -2,7 +2,7 @@ import { evaluate } from '../lib/sigma/index.ts';
 import type { ConditionNode, FieldCheck, Trace } from '../lib/sigma/index.ts';
 import { EXAMPLES, DEFAULT_EXAMPLE } from '../lib/examples.ts';
 import { Dropdown } from './dropdown.ts';
-import { animateDisclosures, initReveal, pulseOnChange } from './motion.ts';
+import { animateDisclosures, initReveal, initScramble, initSpotlight, pulseOnChange } from './motion.ts';
 import { initCursor } from './cursor.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -227,8 +227,11 @@ function init() {
 
   ruleBox.addEventListener('input', schedule);
   eventBox.addEventListener('input', schedule);
+  const fx = document.documentElement.classList;
   initReveal();
-  if (document.documentElement.classList.contains('fx-cursor')) initCursor();
+  if (fx.contains('fx-cursor')) initCursor();
+  if (fx.contains('fx-scramble')) initScramble();
+  if (fx.contains('fx-spotlight')) initSpotlight();
 
   shareBtn.addEventListener('click', async () => {
     const url = `${location.origin}${location.pathname}#s=${encodeState()}`;

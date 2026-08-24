@@ -41,11 +41,18 @@ const description =
       var theme = prefs.theme;
       if (!theme) { try { theme = localStorage.getItem('theme'); } catch (e) {} }
       h.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-      var ACCENTS = ['cyan', 'oxide', 'phosphor', 'violet'];
-      h.setAttribute('data-accent', ACCENTS.indexOf(prefs.accent) > -1 ? prefs.accent : 'cyan');
+      /* Five presets, and site.config.js sets accent: 'sulfur' as the default. */
+      var ACCENTS = ['cyan', 'oxide', 'phosphor', 'violet', 'sulfur'];
+      h.setAttribute('data-accent', ACCENTS.indexOf(prefs.accent) > -1 ? prefs.accent : 'sulfur');
 
-      var fx = Object.assign({ grain: true, reveal: true, drift: true, cursor: true }, prefs.fx || {});
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { fx.drift = false; fx.cursor = false; }
+      /* Same fx defaults as site.config.js. */
+      var fx = Object.assign(
+        { cursor: true, reveal: true, spotlight: true, grain: true, drift: true, scramble: true },
+        prefs.fx || {}
+      );
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        fx.drift = false; fx.cursor = false; fx.scramble = false;
+      }
       for (var k in fx) { if (fx[k]) h.classList.add('fx-' + k); }
     })();
   </script>
@@ -78,7 +85,7 @@ const description =
 <main class="wrap">
 
   <div class="bar reveal">
-    <span class="dd-label" id="example-label">Example</span>
+    <span class="dd-label" id="example-label" data-scramble>Example</span>
     <div id="example-mount"></div>
     <span id="example-note"></span>
     <button id="share" class="btn spacer" type="button">Copy share link</button>
@@ -87,7 +94,7 @@ const description =
   <div class="panes reveal-stagger">
     <section class="pane">
       <div class="pane-h">
-        <span>Sigma rule</span>
+        <span data-scramble>Sigma rule</span>
         <span class="hint">YAML</span>
       </div>
       <label class="sr" for="rule">Sigma rule in YAML</label>
@@ -96,7 +103,7 @@ const description =
 
     <section class="pane">
       <div class="pane-h">
-        <span>Log event</span>
+        <span data-scramble>Log event</span>
         <span class="hint">Field: value lines, or JSON</span>
       </div>
       <label class="sr" for="event">Log event</label>
@@ -108,13 +115,13 @@ const description =
   <div id="msgs" class="msgs"></div>
 
   <div class="results reveal-stagger">
-    <section class="card">
-      <h2>Blocks — what matched, and why</h2>
+    <section class="card" data-spotlight>
+      <h2 data-scramble>Blocks — what matched, and why</h2>
       <div class="card-body" id="blocks"></div>
     </section>
 
-    <section class="card">
-      <h2>Condition</h2>
+    <section class="card" data-spotlight>
+      <h2 data-scramble>Condition</h2>
       <div class="card-body tree" id="tree"></div>
     </section>
   </div>

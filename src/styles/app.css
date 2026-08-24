@@ -78,13 +78,46 @@ button{cursor:pointer}
 }
 
 /* ---------- accent presets ---------- *
- * --hit is the "this matched" text colour and --accent-text is accent text on
- * a tinted chip. Both are written as literal hex rather than derived with
- * a mix function: several presets needed a nudge toward the ink to clear 4.5:1,
- * the ratios were solved once up front, and literal values keep every computed
- * colour a plain rgb() instead of oklab()/color(srgb) — which is both wider
- * browser support and actually inspectable.                                   */
+ * All five presets from the site, sulfur first because site.config.js sets
+ * accent: 'sulfur' — so sulfur carries the bare :root, not cyan. Note sulfur's
+ * --accent-2 is a steel blue, which makes "matched" blue against the gold UI
+ * accent rather than gold-on-gold.
+ *
+ * --hit is "this matched" as text; --accent-text is accent text on a tinted
+ * chip. Both are literal hex: some presets needed a solved nudge toward the ink
+ * to clear 4.5:1, and literal values keep every computed colour a plain rgb()
+ * instead of oklab()/color(srgb) — wider support, and actually inspectable.
+ *
+ * --hit is solved against BOTH surfaces it appears on. The block pill sits on
+ * --bg-sunken and the verdict badge on --bg-raised; on dark the raised surface
+ * is the stricter case, on light the sunken one is. Solving for only one let
+ * dark/oxide's ALERT badge through at 4.16. */
 :root,
+[data-accent="sulfur"]{
+  --accent:#e0b83a;
+  --accent-strong:#f0c748;
+  --accent-tint:rgba(224,184,58,0.12);
+  --accent-contrast:#14100a;
+  --accent-2:#7d9cc0;
+  --hit:#7d9cc0;
+  --hit-soft:rgba(125,156,192,0.09);
+  --hit-line:rgba(125,156,192,0.3);
+  --accent-line:rgba(224,184,58,0.4);
+  --accent-text:#f0c748;
+}
+[data-theme="light"][data-accent="sulfur"],
+[data-theme="light"]:not([data-accent]){
+  --accent:#8f731a;
+  --accent-strong:#745c12;
+  --accent-tint:rgba(143,115,26,0.12);
+  --accent-contrast:#f4f1ea;
+  --accent-2:#3e5c7a;
+  --hit:#3e5c7a;
+  --hit-soft:rgba(62,92,122,0.09);
+  --hit-line:rgba(62,92,122,0.3);
+  --accent-line:rgba(143,115,26,0.4);
+  --accent-text:#705912;
+}
 [data-accent="cyan"]{
   --accent:#1a8fa3;
   --accent-strong:#20a6bd;
@@ -97,14 +130,13 @@ button{cursor:pointer}
   --accent-line:rgba(26,143,163,0.4);
   --accent-text:#20a6bd;
 }
-[data-theme="light"][data-accent="cyan"],
-[data-theme="light"]:not([data-accent]){
+[data-theme="light"][data-accent="cyan"]{
   --accent:#0e6e80;
   --accent-strong:#0a5663;
   --accent-tint:rgba(14,110,128,0.1);
   --accent-contrast:#f4f1ea;
   --accent-2:#9a7a3c;
-  --hit:#745e32;
+  --hit:#725d32;
   --hit-soft:rgba(154,122,60,0.09);
   --hit-line:rgba(154,122,60,0.3);
   --accent-line:rgba(14,110,128,0.4);
@@ -116,7 +148,7 @@ button{cursor:pointer}
   --accent-tint:rgba(194,80,46,0.1);
   --accent-contrast:#1a0b06;
   --accent-2:#6b7a6e;
-  --hit:#748276;
+  --hit:#7e8b80;
   --hit-soft:rgba(107,122,110,0.09);
   --hit-line:rgba(107,122,110,0.3);
   --accent-line:rgba(194,80,46,0.4);
@@ -128,7 +160,7 @@ button{cursor:pointer}
   --accent-tint:rgba(168,66,31,0.1);
   --accent-contrast:#f4f1ea;
   --accent-2:#5c6b5f;
-  --hit:#556358;
+  --hit:#556258;
   --hit-soft:rgba(92,107,95,0.09);
   --hit-line:rgba(92,107,95,0.3);
   --accent-line:rgba(168,66,31,0.4);
@@ -152,7 +184,7 @@ button{cursor:pointer}
   --accent-tint:rgba(31,143,51,0.1);
   --accent-contrast:#f4f1ea;
   --accent-2:#6b7076;
-  --hit:#5c6166;
+  --hit:#5b5f64;
   --hit-soft:rgba(107,112,118,0.09);
   --hit-line:rgba(107,112,118,0.3);
   --accent-line:rgba(31,143,51,0.4);
@@ -176,7 +208,7 @@ button{cursor:pointer}
   --accent-tint:rgba(74,83,214,0.1);
   --accent-contrast:#f4f1ea;
   --accent-2:#9a7a3c;
-  --hit:#745e32;
+  --hit:#725d32;
   --hit-soft:rgba(154,122,60,0.09);
   --hit-line:rgba(154,122,60,0.3);
   --accent-line:rgba(74,83,214,0.4);
@@ -434,6 +466,18 @@ textarea:focus{outline:none}
   padding:11px 14px;border-bottom:1px solid var(--rule);background:var(--bg-sunken);
 }
 .card-body{padding:12px 14px}
+
+/* pointer-tracking spotlight, driven by --mx/--my — same treatment the site
+   gives .index-card. */
+.card{position:relative}
+.card::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(160px circle at var(--mx,50%) var(--my,50%),
+                             var(--accent-tint),transparent 70%);
+  transition:opacity .3s ease;
+}
+html.fx-spotlight .card:hover::after{opacity:1}
+.card > *{position:relative;z-index:1}
 
 /* ---------- blocks ---------- */
 .block{border:1px solid var(--rule);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
