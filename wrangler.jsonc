@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sigma-trace",
+  "compatibility_date": "2026-08-24",
+
+  // Pure static site: no "main", so no Worker script runs at all — requests are
+  // served straight from the asset store. The _headers file in dist/ (copied
+  // from public/) is applied natively, which is what carries the CSP.
+  "assets": {
+    "directory": "./dist"
+  }
+}
