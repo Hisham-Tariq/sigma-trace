@@ -28,34 +28,9 @@ const description =
   />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#931;</text></svg>" />
 
-  <script is:inline>
-    /* Prefs boot, before first paint — the same keys and the same fx-class
-       pattern hishamtariq.com uses, so this page obeys the same settings.
-       Note: localStorage is per-origin, so a subdomain does not literally
-       inherit the main site's choice; matching the keys means the behaviour
-       and the defaults are identical, not that they sync. */
-    (function () {
-      var h = document.documentElement;
-      var prefs = {};
-      try { prefs = JSON.parse(localStorage.getItem('site-prefs') || '{}'); } catch (e) {}
-      var theme = prefs.theme;
-      if (!theme) { try { theme = localStorage.getItem('theme'); } catch (e) {} }
-      h.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-      /* Five presets, and site.config.js sets accent: 'sulfur' as the default. */
-      var ACCENTS = ['cyan', 'oxide', 'phosphor', 'violet', 'sulfur'];
-      h.setAttribute('data-accent', ACCENTS.indexOf(prefs.accent) > -1 ? prefs.accent : 'sulfur');
-
-      /* Same fx defaults as site.config.js. */
-      var fx = Object.assign(
-        { cursor: true, reveal: true, spotlight: true, grain: true, drift: true, scramble: true },
-        prefs.fx || {}
-      );
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        fx.drift = false; fx.cursor = false; fx.scramble = false;
-      }
-      for (var k in fx) { if (fx[k]) h.classList.add('fx-' + k); }
-    })();
-  </script>
+  <!-- is:inline keeps Astro from bundling it; it is served from public/ and
+       must run before first paint. -->
+  <script is:inline src="/boot.js"></script>
 </head>
 <body>
 
